@@ -37,7 +37,7 @@ heatmapWithLnl = function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
   cexCol = 0.2 + 1/log10(nc), labRow = NULL, labCol = NULL, 
   key = TRUE, keysize = 1.5, density.info = c("histogram", "density", "none"), denscol = tracecol, symkey = min(x < 0, na.rm = TRUE) || symbreaks, densadj = 0.25, main = NULL, 
   xlab = NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid = NULL,
-  catCol = NULL, lnl = NULL,
+  catCol = NULL, lnl = NULL, catNames = NULL,
   ...) 
 {
   scale01 <- function(x, low = min(x), high = max(x)) {
@@ -343,7 +343,8 @@ heatmapWithLnl = function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
                   yaxs="i", 
                   xaxs="i"
                   )
-          axis(4, labels = F , tick = F)
+          ## axis(4, labels = F , tick = F)
+          legend("topleft", legend = catNames, cex = .5, col = categoryColors[1:length(catNames)],  lwd = 2)
           mtext("relative lnl", side=4, cex=.7, line = +1)
         }
       else
@@ -428,13 +429,13 @@ coerce= function(row)
 ## basically you can use this sed command:
 ## sed "s/\(.*\) \(.*\): \(.*\) \(.*\)/\1\t\2\t\3\t\4/"
 
-rfDistancesWithLikelihood  = function(rfDistFile, lnlFile, lnlCol, catCol)
+rfDistancesWithLikelihood  = function(rfDistFile, lnlFile, lnlCol, catCol, findML = TRUE)
   {
     rfFile = paste(rfDistFile, ".forR", sep="")
     system( paste("cat " , rfDistFile ,
                  " | sed 's/\\(.*\\) \\(.*\\): \\(.*\\) \\(.*\\)/\\1\\t\\2\\t\\3\\t\\4/' > "
                  ,rfFile ) )
-    tab = read.table("RAxML_RF-Distances.tmp.forR") 
+    tab = read.table(rfFile)    
     size= max(tab[,c(1,2)]) + 1
 
     ## matrixify 
@@ -458,29 +459,39 @@ rfDistancesWithLikelihood  = function(rfDistFile, lnlFile, lnlCol, catCol)
     colnames(mat) = names
     rownames(mat) = names
 
+
     ## mark trees with maximum likelihood per category in red. In my case
     ## the second column indicates different partitioning schemes
     ## (=categories) for which the lnl are not comparable among each other
-    relativeLnl = rep(NA, dim(mat)[1])
-    isItMl = rep("white", dim(mat)[1] )
-    for(thisLevel in levels(lnl[,catCol]))
+    if(  findML)
       {
-        relevantHere = lnl[,catCol] == thisLevel    
-        isItMl[lnl[,lnlCol] == max(lnl[relevantHere, lnlCol])] = "red"    
-        myMean = mean(lnl[relevantHere,lnlCol])
-        relativeLnl[relevantHere] =   lnl[relevantHere,lnlCol]  / myMean        
+        relativeLnl = rep(NA, dim(mat)[1])
+        isItMl = rep("white", dim(mat)[1] )
+        for(thisLevel in levels(lnl[,catCol]))
+          {
+            relevantHere = lnl[,catCol] == thisLevel    
+            isItMl[lnl[,lnlCol] == max(lnl[relevantHere, lnlCol])] = "red"    
+            myMean = mean(lnl[relevantHere,lnlCol])
+            relativeLnl[relevantHere] =   lnl[relevantHere,lnlCol]  / myMean
+          }
+        
+        par(oma=c(1,0,0,1))
+        
+        heatmapWithLnl(mat,
+                       RowSideColor = categoryColors[lnl[,catCol]],
+                       ColSideColor =   isItMl ,
+                       keysize = 1,
+                       cexRow=.55, cexCol=.55 ,
+                       lnl = relativeLnl,
+                       catCol =  categoryColors[lnl[,catCol]],
+                       catNames = levels(lnl[,catCol])
+                       )
       }
-
-    par(oma=c(1,0,0,1))
-    
-    heatmapWithLnl(mat,
-                   RowSideColor = categoryColors[lnl[,catCol]],
-                   ColSideColor = isItMl ,
-                   keysize = 1,
-                   cexRow=.55, cexCol=.55 ,
-                   lnl = relativeLnl,
-                   catCol = categoryColors[lnl[,catCol]]
-                   )
+    else
+      {
+        par(oma=c(1,0,0,1))
+        heatmap.2(mat,  symm=T, revC = T, na.color = "black", Colv = T, cexRow = .6, cexCol = .6, trace = "none" )
+      }
     
   }
 

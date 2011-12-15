@@ -37,7 +37,7 @@ heatmapWithLnl = function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
   cexCol = 0.2 + 1/log10(nc), labRow = NULL, labCol = NULL, 
   key = TRUE, keysize = 1.5, density.info = c("histogram", "density", "none"), denscol = tracecol, symkey = min(x < 0, na.rm = TRUE) || symbreaks, densadj = 0.25, main = NULL, 
   xlab = NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid = NULL,
-  catCol = NULL, lnl = NULL, catNames = NULL,
+  catCol = NULL, lnl = NULL, catNames = NULL, clustmethod="complete",
   ...) 
 {
   scale01 <- function(x, low = min(x), high = max(x)) {
@@ -97,7 +97,7 @@ heatmapWithLnl = function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
     rowInd <- order.dendrogram(ddr)
   }
   else if (is.integer(Rowv)) {
-    hcr <- hclustfun(distfun(x))
+    hcr <- hclustfun(distfun(x),  method=clustmethod)
     ddr <- as.dendrogram(hcr)
     ddr <- reorder(ddr, Rowv)
     rowInd <- order.dendrogram(ddr)
@@ -106,7 +106,7 @@ heatmapWithLnl = function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
   }
   else if (isTRUE(Rowv)) {
     Rowv <- rowMeans(x, na.rm = na.rm)
-    hcr <- hclustfun(distfun(x))
+    hcr <- hclustfun(distfun(x), method=clustmethod)
     ddr <- as.dendrogram(hcr)
     ddr <- reorder(ddr, Rowv)
     rowInd <- order.dendrogram(ddr)
@@ -132,7 +132,7 @@ heatmapWithLnl = function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
   else if (is.integer(Colv)) {
     hcc <- hclustfun(distfun(if (symm) 
                              x
-    else t(x)))
+    else t(x)), method=clustmethod)
     ddc <- as.dendrogram(hcc)
     ddc <- reorder(ddc, Colv)
     colInd <- order.dendrogram(ddc)
@@ -143,7 +143,7 @@ heatmapWithLnl = function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
     Colv <- colMeans(x, na.rm = na.rm)
     hcc <- hclustfun(distfun(if (symm) 
                              x
-    else t(x)))
+    else t(x)), method=clustmethod)
     ddc <- as.dendrogram(hcc)
     ddc <- reorder(ddc, Colv)
     colInd <- order.dendrogram(ddc)
@@ -429,7 +429,7 @@ coerce= function(row)
 ## basically you can use this sed command:
 ## sed "s/\(.*\) \(.*\): \(.*\) \(.*\)/\1\t\2\t\3\t\4/"
 
-rfDistancesWithLikelihood  = function(rfDistFile, lnlFile, lnlCol, catCol, findML = TRUE)
+rfDistancesWithLikelihood  = function(rfDistFile, lnlFile, lnlCol, catCol, findML = TRUE, clustmethod="complete")
   {
     rfFile = paste(rfDistFile, ".forR", sep="")
     system( paste("cat " , rfDistFile ,
@@ -484,7 +484,8 @@ rfDistancesWithLikelihood  = function(rfDistFile, lnlFile, lnlCol, catCol, findM
                        cexRow=.55, cexCol=.55 ,
                        lnl = relativeLnl,
                        catCol =  categoryColors[lnl[,catCol]],
-                       catNames = levels(lnl[,catCol])
+                       catNames = levels(lnl[,catCol]),
+                       clustmethod=clustmethod
                        )
       }
     else

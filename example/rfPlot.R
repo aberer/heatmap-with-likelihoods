@@ -9,5 +9,7 @@ lnlFile = "lnl.tab"
 lnlCol = 4
 catCol = 2
 
-rfDistancesWithLikelihood(rfDistFile, lnlFile, lnlCol, catCol) # , findML = TRUE
+rfDistancesWithLikelihood(rfDistFile, lnlFile, lnlCol, catCol, clustmethod="complete")
+rfDistancesWithLikelihood(rfDistFile, lnlFile, lnlCol, catCol, clustmethod="single")
+rfDistancesWithLikelihood(rfDistFile, lnlFile, lnlCol, catCol, clustmethod="average") 
 bla =dev.off()

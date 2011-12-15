@@ -344,7 +344,7 @@ heatmapWithLnl = function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
                   xaxs="i"
                   )
           ## axis(4, labels = F , tick = F)
-          legend("topleft", legend = catNames, cex = .5, col = categoryColors[1:length(catNames)],  lwd = 2)
+          legend("topleft", legend = catNames, cex = .5, col = categoryColors[1:length(catNames)],  lwd = 3)
           mtext("relative lnl", side=4, cex=.7, line = +1)
         }
       else

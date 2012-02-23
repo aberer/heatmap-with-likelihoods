@@ -20,7 +20,7 @@
 
 library(gplots)
 
-categoryColors = c("blue" , "red", "green", "yellow", "magenta", "cyan", "pink")
+categoryColors = c("blue" , "red", "green", "yellow", "magenta", "cyan", "pink", "orange", "black")
 
 ## begin hacked heatmap.2
 heatmapWithLnl = function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE, 
@@ -467,12 +467,13 @@ rfDistancesWithLikelihood  = function(rfDistFile, lnlFile, lnlCol, catCol, findM
       {
         relativeLnl = rep(NA, dim(mat)[1])
         isItMl = rep("white", dim(mat)[1] )
+
         for(thisLevel in levels(lnl[,catCol]))
           {
             relevantHere = lnl[,catCol] == thisLevel    
-            isItMl[lnl[,lnlCol] == max(lnl[relevantHere, lnlCol])] = "red"    
-            myMean = mean(lnl[relevantHere,lnlCol])
-            relativeLnl[relevantHere] =   lnl[relevantHere,lnlCol]  / myMean
+            isItMl[lnl[,lnlCol] == max(lnl[relevantHere, lnlCol])] = "red"
+            tmp = (lnl[relevantHere,lnlCol] - min(lnl[relevantHere,lnlCol]))
+            relativeLnl[relevantHere] = tmp  / max(tmp)              
           }
         
         par(oma=c(1,0,0,1))
